@@ -244,6 +244,12 @@ def save_pianoroll(filename, pianoroll, programs, is_drums, tempo,
         raise ValueError("Length of `is_drums` does not match the number of "
                          "tracks for the input array.")
 
+    multitrack = pianoroll_to_multitrack(pianoroll, programs, is_drums, tempo,
+                                         beat_resolution, lowest_pitch)
+    multitrack.save(filename)
+
+
+def reshape_pianoroll(pianoroll, lowest_pitch):
     reshaped = pianoroll.reshape(
         -1, pianoroll.shape[1] * pianoroll.shape[2], pianoroll.shape[3],
         pianoroll.shape[4])
@@ -256,7 +262,12 @@ def save_pianoroll(filename, pianoroll, programs, is_drums, tempo,
 
     # Reshape the batched pianoroll array to a single pianoroll array
     pianoroll_ = padded.reshape(-1, padded.shape[2], padded.shape[3])
+    return pianoroll_
 
+
+def pianoroll_to_multitrack(pianoroll, programs, is_drums, tempo,
+                            beat_resolution, lowest_pitch):
+    pianoroll_ = reshape_pianoroll(pianoroll, lowest_pitch)
     # Create the tracks
     tracks = []
     for idx in range(pianoroll_.shape[2]):
@@ -266,4 +277,4 @@ def save_pianoroll(filename, pianoroll, programs, is_drums, tempo,
     # Create and save the multitrack
     multitrack = pypianoroll.Multitrack(
         tracks=tracks, tempo=tempo, beat_resolution=beat_resolution)
-    multitrack.save(filename)
+    return multitrack

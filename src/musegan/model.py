@@ -5,7 +5,7 @@ import imageio
 import numpy as np
 import tensorflow as tf
 from musegan.io_utils import pianoroll_to_image, vector_to_image
-from musegan.io_utils import image_grid, save_pianoroll
+from musegan.io_utils import image_grid, save_pianoroll, pianoroll_to_multitrack
 from musegan.losses import get_adv_losses
 from musegan.utils import load_component, make_sure_path_exists
 LOGGER = logging.getLogger(__name__)
@@ -320,6 +320,7 @@ class Model:
             # --- Save pianoroll ops -------------------------------------------
             if config['collect_save_pianorolls_op']:
                 def _save_pianoroll(array, suffix, name):
+                    # save npz
                     filepath = _get_filepath('pianorolls', name, suffix, 'npz')
                     if 'hard_thresholding' in name:
                         array = (array > 0)
@@ -331,6 +332,16 @@ class Model:
                         list(map(bool, config['midi']['is_drums'])),
                         config['midi']['tempo'], params['beat_resolution'],
                         config['midi']['lowest_pitch'])
+
+                    # save midi
+                    filepath = _get_filepath('midis', name, suffix, 'mid')
+                    pianoroll_to_multitrack(
+                        array, config['midi']['programs'],
+                        list(map(bool, config['midi']['is_drums'])),
+                        config['midi']['tempo'], params['beat_resolution'],
+                        config['midi']['lowest_pitch']
+                    ).write(filepath)
+
                     return np.array([0], np.int32)
 
                 if params['use_binary_neurons']:
