@@ -359,6 +359,8 @@ class Model:
                         [value, config['suffix']], tf.int32))
                     make_sure_path_exists(
                         os.path.join(config['result_dir'], 'pianorolls', key))
+                    make_sure_path_exists(
+                        os.path.join(config['result_dir'], 'midis', key))
                 nodes['save_pianorolls_op'] = tf.group(save_pianoroll_ops)
 
         return nodes
